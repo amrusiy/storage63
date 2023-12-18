@@ -59,5 +59,5 @@ app.http("GetItems", {
         body: error.message,
       };
     }
-  }, //jgkhjg
+  },
 });
