@@ -23,7 +23,7 @@ app.http("Transfer", {
             op: 'add',
             value: {
               timestamp: Date.now(),
-              userId: user.id,
+              createdByUserId: user.id,
               type: 'transfer',
               transferToUserId,
             } as ItemEvent

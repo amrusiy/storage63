@@ -23,7 +23,7 @@ app.http("Report", {
             op: 'add',
             value: {
               timestamp: Date.now(),
-              userId: user.id,
+              createdByUserId: user.id,
               type: 'report',
               status,
             } as ItemEvent
