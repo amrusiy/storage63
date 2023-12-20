@@ -3,19 +3,19 @@ import { CosmosClient } from "@azure/cosmos";
 import { groupBy } from "../utils";
 import { authenticate } from "../auth";
 
-app.http("Report", {
+app.http("Transfer", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "items/{id}/report",
+  route: "items/{id}/transfer",
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
       const cosmos = new CosmosClient(connectionString);
 
       const user = await authenticate(request);
-      const status = await request.text();
-      if (!['active', 'faulty', 'lost'].some(_ => status === _))
-        throw { status: 400, message: `Body should contain a valid status: active, faulty, lost. Found: '${status}'` }
+      const transferToUserId = await request.text();
+      if ((await cosmos.database('db').container('users').item(transferToUserId).read()).statusCode === 404)
+        throw { status: 404, message: `User with the specified was not found.` }
       cosmos.database('db').container('items').item(request.params.id).patch({
         operations: [
           {
@@ -24,14 +24,14 @@ app.http("Report", {
             value: {
               timestamp: Date.now(),
               userId: user.id,
-              type: 'report',
-              status,
+              type: 'transfer',
+              transferToUserId,
             }
           },
           {
-            path: '/status',
+            path: '/userId',
             op: 'replace',
-            value: status
+            value: transferToUserId
           }
         ]
       })

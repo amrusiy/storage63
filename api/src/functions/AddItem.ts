@@ -25,9 +25,24 @@ app.http("AddItem", {
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
-      const cosmosClient = new CosmosClient(connectionString);
+      const cosmos = new CosmosClient(connectionString);
 
+<<<<<<< HEAD
       const user = await authenticate(request);
+=======
+      // authorization
+      const userId = request.headers.get("userId");
+      const password = request.headers.get("password");
+
+      if (!userId || !password) return { status: 401 };
+
+      const { resource: user } = await cosmos
+        .database("db")
+        .container("users")
+        .item(userId, userId)
+        .read();
+      if (!user || user.password !== password) return { status: 401 };
+>>>>>>> 051226126ae7b93952d9359271df82d04c9f076a
 
       // Parse the incoming request body to get the item data
       const itemData: ItemData = (await request.json()) as any;
@@ -49,7 +64,7 @@ app.http("AddItem", {
         ];
       }
       // Add the item to the Cosmos DB container
-      const { resource: newItem } = await cosmosClient
+      const { resource: newItem } = await cosmos
         .database("db")
         .container("items")
         .items.create(itemData);
