@@ -1,7 +1,6 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../auth";
-import { timeStamp } from "console";
 
 // Define the interface for the item data
 interface ItemData {
@@ -11,9 +10,8 @@ interface ItemData {
   status: string;
   history: {
     timestamp: number;
-    userId: string;
     status: "active" | "faulty" | "lost";
-    event: string;
+    type: string;
   }[]; // adjust the type of history as needed
 }
 
@@ -36,13 +34,9 @@ app.http("AddItem", {
         throw { status: 400, body: "Missing required fields." };
       } else {
         itemData.userId = user.id;
-        // Assuming timeStamp is a string, parse it into a number
-        const parsedTimestamp = Date.parse(timeStamp);
-
         itemData.history = [
           {
-            timestamp: parsedTimestamp || 0, // Use 0 if parsing fails
-            unitId: itemData.unitId,
+            timestamp: Date.now(),
             type: "create",
           },
         ];
