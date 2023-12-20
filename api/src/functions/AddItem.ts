@@ -15,10 +15,10 @@ app.http("AddItem", {
       const user = await authenticate(request);
 
       // Parse the incoming request body to get the item data
-      const itemData: Item = (await request.json()) as any;
+      const itemData: Item = (await request.json()) as Item;
 
       // Validate required fields
-      if (!["unitId", "sku", "status"].every((key) => itemData[key])) {
+      if (!["id", "unitId", "sku", "status"].every((key) => itemData[key])) {
         throw { status: 400, body: "Missing required fields." };
       } else {
         itemData.userId = user.id;
@@ -38,7 +38,7 @@ app.http("AddItem", {
 
       return {
         status: 200,
-        body: newItem,
+        body: JSON.stringify(newItem),
       };
     } catch (error) {
       return {
