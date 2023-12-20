@@ -19,7 +19,7 @@ app.http("AddItem", {
 
       // Validate required fields
       if (!["id", "unitId", "sku", "status"].every((key) => itemData[key])) {
-        throw { status: 400, body: "Missing required fields." };
+        throw { status: 400, message: "Missing required fields." };
       } else {
         itemData.userId = user.id;
         itemData.history = [
