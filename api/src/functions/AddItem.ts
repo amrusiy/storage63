@@ -23,13 +23,9 @@ app.http("AddItem", {
         throw { status: 400, body: "Missing required fields." };
       } else {
         itemData.userId = user.id;
-        // Assuming timeStamp is a string, parse it into a number
-        const parsedTimestamp = Date.parse(timeStamp);
-
         itemData.history = [
           {
-            timestamp: parsedTimestamp || 0, // Use 0 if parsing fails
-            unitId: itemData.unitId,
+            timestamp: Date.now(),
             type: "create",
           },
         ];
