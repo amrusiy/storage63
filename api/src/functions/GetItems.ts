@@ -10,12 +10,12 @@ app.http("GetItems", {
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
-      const cosmosClient = new CosmosClient(connectionString);
+      const cosmos = new CosmosClient(connectionString);
 
       async function getChildUnitIds(unitId: string): Promise<string[]> {
         const {
           resource: { childUnitIds },
-        } = await cosmosClient
+        } = await cosmos
           .database("db")
           .container("units")
           .item(unitId, unitId)
@@ -30,7 +30,7 @@ app.http("GetItems", {
       
       if (request.params.id) {
         // Get specific item
-        const { resource: item } = await cosmosClient
+        const { resource: item } = await cosmos
           .database("db")
           .container("items")
           .item(request.params.id, request.params.id)
@@ -45,7 +45,7 @@ app.http("GetItems", {
         const filter = ['unitId', 'sku', 'status'].map(key => ` AND ${key} = ${request.query.get(key)}`).join('');
         const order = request.query.get("orderBy");
         const group = request.query.get("groupBy");
-        const { resources: items } = await cosmosClient
+        const { resources: items } = await cosmos
           .database("db")
           .container("items")
           .items.query(`SELECT i.id, i.sku, i.status, i.unitId FROM items i WHERE i.unitId IN (${unitIds.map(id => `"${id}"`).join()})${filter}ORDER BY ${order} ASC`)

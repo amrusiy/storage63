@@ -3,20 +3,20 @@ import { CosmosClient } from "@azure/cosmos";
 import { groupBy } from "../utils";
 import { authenticate } from "../auth";
 
-app.http("Report", {
+app.http("Transfer", {
   methods: ["POST"],
   authLevel: "anonymous",
   route: "items/{id}/transfer",
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
-      const cosmosClient = new CosmosClient(connectionString);
+      const cosmos = new CosmosClient(connectionString);
 
       const user = await authenticate(request);
       const transferToUserId = await request.text();
-      if ((await cosmosClient.database('db').container('users').item(transferToUserId).read()).statusCode === 404)
+      if ((await cosmos.database('db').container('users').item(transferToUserId).read()).statusCode === 404)
         throw { status: 404, message: `User with the specified was not found.` }
-      cosmosClient.database('db').container('items').item(request.params.id).patch({
+      cosmos.database('db').container('items').item(request.params.id).patch({
         operations: [
           {
             path: '/history',

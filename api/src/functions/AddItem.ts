@@ -9,7 +9,7 @@ app.http("AddItem", {
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
-      const cosmosClient = new CosmosClient(connectionString);
+      const cosmos = new CosmosClient(connectionString);
 
       // authorization
       const userId = request.headers.get("userId");
@@ -17,7 +17,7 @@ app.http("AddItem", {
 
       if (!userId || !password) return { status: 401 };
 
-      const { resource: user } = await cosmosClient
+      const { resource: user } = await cosmos
         .database("db")
         .container("users")
         .item(userId, userId)
@@ -38,7 +38,7 @@ app.http("AddItem", {
       }
 
       // Add the item to the Cosmos DB container
-      const { resource: newItem } = await cosmosClient
+      const { resource: newItem } = await cosmos
         .database("db")
         .container("items")
         .items.create(itemData);
