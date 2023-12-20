@@ -2,20 +2,7 @@ import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../auth";
 import { timeStamp } from "console";
-
-// Define the interface for the item data
-interface ItemData {
-  userId: string;
-  unitId: string;
-  sku: string;
-  status: string;
-  history: {
-    timestamp: number;
-    userId: string;
-    status: "active" | "faulty" | "lost";
-    event: string;
-  }[]; // adjust the type of history as needed
-}
+import { Item } from "../types";
 
 app.http("AddItem", {
   methods: ["POST"],
@@ -29,7 +16,7 @@ app.http("AddItem", {
       const user = await authenticate(request);
 
       // Parse the incoming request body to get the item data
-      const itemData: ItemData = (await request.json()) as any;
+      const itemData: Item = (await request.json()) as any;
 
       // Validate required fields
       if (!["unitId", "sku", "status"].every((key) => itemData[key])) {
