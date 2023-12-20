@@ -25,6 +25,7 @@ app.http("AddItem", {
         itemData.history = [
           {
             timestamp: Date.now(),
+            createdByUserId: user.id,
             type: "create",
           },
         ];
@@ -46,5 +47,4 @@ app.http("AddItem", {
       };
     }
   },
-  body: (item) => {},
 });
