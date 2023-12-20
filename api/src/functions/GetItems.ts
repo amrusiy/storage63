@@ -1,6 +1,7 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { groupBy } from "../utils";
+import { authenticate } from "../auth";
 
 app.http("GetItems", {
   methods: ["GET"],
@@ -25,19 +26,7 @@ app.http("GetItems", {
         return [unitId, ...childUnits];
       }
 
-      // authorization
-      const userId = request.headers.get("userId");
-      const password = request.headers.get("password");
-      const group = request.headers.get("groupBy");
-    
-      if (!userId || !password) return { status: 400 }
-
-      const { resource: user } = await cosmosClient
-        .database("db")
-        .container("users")
-        .item(userId, userId)
-        .read();
-      if (!user || user.password !== password) return { status: 401 };
+      const user = await authenticate(request);
       
       if (request.params.id) {
         // Get specific item
@@ -53,10 +42,13 @@ app.http("GetItems", {
       } else {
         // Get list of items
         const unitIds = await getChildUnitIds(user.unitId);
+        const filter = ['unitId', 'sku', 'status'].map(key => ` AND ${key} = ${request.query.get(key)}`).join('');
+        const order = request.query.get("orderBy");
+        const group = request.query.get("groupBy");
         const { resources: items } = await cosmosClient
           .database("db")
           .container("items")
-          .items.query(`SELECT i.id, i.sku, i.status, i.unitId FROM items i WHERE i.unitId IN (${unitIds.map(id => `"${id}"`).join()})`)
+          .items.query(`SELECT i.id, i.sku, i.status, i.unitId FROM items i WHERE i.unitId IN (${unitIds.map(id => `"${id}"`).join()})${filter}ORDER BY ${order} ASC`)
           .fetchAll();
         return {
           status: 200,
@@ -74,8 +66,8 @@ app.http("GetItems", {
       }
     } catch (error) {
       return {
-        status: 500,
-        body: error.message,
+        status: error.status ?? 500,
+        body: error.message
       };
     }
   },
