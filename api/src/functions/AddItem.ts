@@ -1,11 +1,10 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
-import { groupBy } from "../utils";
 
 app.http("AddItem", {
   methods: ["POST"],
   authLevel: "anonymous",
-  route: "additem",
+  route: "items",
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
