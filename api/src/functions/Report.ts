@@ -1,6 +1,7 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../auth";
+import { Item, ItemEvent } from "../types";
 
 app.http("Report", {
   methods: ["POST"],
@@ -25,7 +26,7 @@ app.http("Report", {
               userId: user.id,
               type: 'report',
               status,
-            }
+            } as ItemEvent
           },
           {
             path: '/status',

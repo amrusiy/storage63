@@ -1,6 +1,7 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../auth";
+import { ItemEvent } from "../types";
 
 app.http("Transfer", {
   methods: ["POST"],
@@ -25,7 +26,7 @@ app.http("Transfer", {
               userId: user.id,
               type: 'transfer',
               transferToUserId,
-            }
+            } as ItemEvent
           },
           {
             path: '/userId',

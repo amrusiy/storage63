@@ -1,7 +1,6 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../auth";
-import { timeStamp } from "console";
 import { Item } from "../types";
 
 app.http("AddItem", {
