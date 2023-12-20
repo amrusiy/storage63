@@ -19,22 +19,22 @@ app.http("Transfer", {
           await cosmos
             .database("db")
             .container("users")
-            .item(transferToUserId)
+            .item(transferToUserId, transferToUserId)
             .read()
         ).statusCode === 404
       )
         throw {
           status: 404,
-          message: `User with the specified was not found.`,
+          message: `User with the specified id ${transferToUserId} was not found.`,
         };
       await cosmos
         .database("db")
         .container("items")
-        .item(request.params.id)
+        .item(request.params.id, request.params.id)
         .patch({
           operations: [
             {
-              path: "/history",
+              path: "/history/-",
               op: "add",
               value: {
                 timestamp: Date.now(),

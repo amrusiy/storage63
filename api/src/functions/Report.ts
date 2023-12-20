@@ -22,11 +22,11 @@ app.http("Report", {
       await cosmos
         .database("db")
         .container("items")
-        .item(request.params.id)
+        .item(request.params.id, request.params.id)
         .patch({
           operations: [
             {
-              path: "/history",
+              path: "/history/-",
               op: "add",
               value: {
                 timestamp: Date.now(),
