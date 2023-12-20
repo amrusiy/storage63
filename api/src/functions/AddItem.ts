@@ -1,6 +1,22 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { groupBy } from "../utils";
+import { authenticate } from "../auth";
+import { timeStamp } from "console";
+
+// Define the interface for the item data
+interface ItemData {
+  userId: string;
+  unitId: string;
+  sku: string;
+  status: string;
+  history: {
+    timestamp: number;
+    userId: string;
+    status: "active" | "faulty" | "lost";
+    event: string;
+  }[]; // adjust the type of history as needed
+}
 
 app.http("AddItem", {
   methods: ["POST"],
@@ -11,32 +27,27 @@ app.http("AddItem", {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
       const cosmosClient = new CosmosClient(connectionString);
 
-      // authorization
-      const userId = request.headers.get("userId");
-      const password = request.headers.get("password");
-
-      if (!userId || !password) return { status: 401 };
-
-      const { resource: user } = await cosmosClient
-        .database("db")
-        .container("users")
-        .item(userId, userId)
-        .read();
-      if (!user || user.password !== password) return { status: 401 };
+      const user = await authenticate(request);
 
       // Parse the incoming request body to get the item data
-      const itemData = request.body;
+      const itemData: ItemData = (await request.json()) as any;
 
       // Validate required fields
-      if (
-        !itemData.userId ||
-        !itemData.unitId ||
-        !itemData.sku ||
-        !itemData.status
-      ) {
-        return { status: 400, body: "Missing required fields." };
-      }
+      if (!["unitId", "sku", "status"].every((key) => itemData[key])) {
+        throw { status: 400, body: "Missing required fields." };
+      } else {
+        itemData.userId = user.id;
+        // Assuming timeStamp is a string, parse it into a number
+        const parsedTimestamp = Date.parse(timeStamp);
 
+        itemData.history = [
+          {
+            timestamp: parsedTimestamp || 0, // Use 0 if parsing fails
+            unitId: itemData.unitId,
+            type: "create",
+          },
+        ];
+      }
       // Add the item to the Cosmos DB container
       const { resource: newItem } = await cosmosClient
         .database("db")
@@ -49,9 +60,10 @@ app.http("AddItem", {
       };
     } catch (error) {
       return {
-        status: 500,
+        status: error.status ?? 500,
         body: error.message,
       };
     }
   },
+  body: (item) => {},
 });
