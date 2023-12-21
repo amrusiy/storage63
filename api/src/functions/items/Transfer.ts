@@ -14,28 +14,42 @@ app.http("Transfer", {
 
       const user = await authenticate(request);
       const transferToUserId = await request.text();
-      if ((await cosmos.database('db').container('users').item(transferToUserId).read()).statusCode === 404)
-        throw { status: 404, message: `User with the specified was not found.` }
-      cosmos.database('db').container('items').item(request.params.id).patch({
-        operations: [
-          {
-            path: '/history',
-            op: 'add',
-            value: {
-              timestamp: Date.now(),
-              createdByUserId: user.id,
-              type: 'transfer',
-              transferToUserId,
-            } as ItemEvent
-          },
-          {
-            path: '/userId',
-            op: 'replace',
-            value: transferToUserId
-          }
-        ]
-      })
-
+      if (
+        (
+          await cosmos
+            .database("db")
+            .container("users")
+            .item(transferToUserId, transferToUserId)
+            .read()
+        ).statusCode === 404
+      )
+        throw {
+          status: 404,
+          message: `User with the specified id ${transferToUserId} was not found.`,
+        };
+      await cosmos
+        .database("db")
+        .container("items")
+        .item(request.params.id, request.params.id)
+        .patch({
+          operations: [
+            {
+              path: "/history/-",
+              op: "add",
+              value: {
+                timestamp: Date.now(),
+                createdByUserId: user.id,
+                type: "transfer",
+                transferToUserId,
+              } as ItemEvent,
+            },
+            {
+              path: "/userId",
+              op: "replace",
+              value: transferToUserId,
+            },
+          ],
+        });
     } catch (error) {
       return {
         status: error.status ?? 500,

@@ -14,28 +14,34 @@ app.http("Report", {
 
       const user = await authenticate(request);
       const status = await request.text();
-      if (!['active', 'faulty', 'lost'].some(_ => status === _))
-        throw { status: 400, message: `Body should contain a valid status: active, faulty, lost. Found: '${status}'` }
-      cosmos.database('db').container('items').item(request.params.id).patch({
-        operations: [
-          {
-            path: '/history',
-            op: 'add',
-            value: {
-              timestamp: Date.now(),
-              createdByUserId: user.id,
-              type: 'report',
-              status,
-            } as ItemEvent
-          },
-          {
-            path: '/status',
-            op: 'replace',
-            value: status
-          }
-        ]
-      })
-
+      if (!["active", "faulty", "lost"].some((_) => status === _))
+        throw {
+          status: 400,
+          message: `Body should contain a valid status: active, faulty, lost. Found: '${status}'`,
+        };
+      await cosmos
+        .database("db")
+        .container("items")
+        .item(request.params.id, request.params.id)
+        .patch({
+          operations: [
+            {
+              path: "/history/-",
+              op: "add",
+              value: {
+                timestamp: Date.now(),
+                createdByUserId: user.id,
+                type: "report",
+                status,
+              } as ItemEvent,
+            },
+            {
+              path: "/status",
+              op: "replace",
+              value: status,
+            },
+          ],
+        });
     } catch (error) {
       return {
         status: error.status ?? 500,
