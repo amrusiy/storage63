@@ -2,10 +2,10 @@ import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../../auth";
 
-app.http("GetUsers", {
+app.http("GetSKUs", {
   methods: ["GET"],
   authLevel: "anonymous",
-  route: "users/{id?}",
+  route: "skus/{id?}",
   handler: async (request, context) => {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
@@ -17,18 +17,18 @@ app.http("GetUsers", {
         // Get specific item
         const { resource: item } = await cosmos
           .database("db")
-          .container("users")
+          .container("skus")
           .item(request.params.id, request.params.id)
           .read();
         return {
           status: item ? 200 : 404,
-          body: item ? JSON.stringify(item) : `user with the id ${request.params.id} was not found.`
+          body: item ? JSON.stringify(item) : `sku with the id ${request.params.id} was not found.`
         }
       } else {
         // Get list of items
         const { resources: items } = await cosmos
           .database("db")
-          .container("users")
+          .container("skus")
           .items.readAll()
           .fetchAll();
         return {

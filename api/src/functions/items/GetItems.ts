@@ -2,6 +2,7 @@ import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 import { groupBy } from "../../utils";
 import { authenticate } from "../../auth";
+import { getChildUnitIds } from "../units/GetUnits";
 
 app.http("GetItems", {
   methods: ["GET"],
@@ -11,23 +12,8 @@ app.http("GetItems", {
     try {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
       const cosmos = new CosmosClient(connectionString);
-
-      async function getChildUnitIds(unitId: string): Promise<string[]> {
-        const {
-          resource: { childUnitIds },
-        } = await cosmos
-          .database("db")
-          .container("units")
-          .item(unitId, unitId)
-          .read<{ childUnitIds: string[] }>();
-        const childUnits = (await Promise.all(
-          (childUnitIds ?? []).map(async (unitId) => await getChildUnitIds(unitId))
-        )).flat();
-        return [unitId, ...childUnits];
-      }
-
       const user = await authenticate(request);
-      
+
       if (request.params.id) {
         // Get specific item
         const { resource: item } = await cosmos
@@ -37,7 +23,7 @@ app.http("GetItems", {
           .read();
         return {
           status: item ? 200 : 404,
-          body: JSON.stringify(item)
+          body: item ? JSON.stringify(item) : `item with the id ${request.params.id} was not found.`
         }
       } else {
         // Get list of items
