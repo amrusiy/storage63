@@ -3,7 +3,7 @@ import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../../auth";
 import { User } from "../../types";
 
-app.http("AddUser", {
+app.http("CreateUser", {
   methods: ["POST"],
   authLevel: "anonymous",
   route: "users",
@@ -21,7 +21,7 @@ app.http("AddUser", {
 
       const { resource: { id } } = await cosmos.database('db').container('users').items.create<User>(data);
       if (data.unitId)
-        cosmos.database('db').container('units').item(data.unitId).patch({
+        cosmos.database('db').container('units').item(data.unitId, data.unitId).patch({
           operations: [
             { path: '/userIds/-', op: 'add', value: id }
           ]

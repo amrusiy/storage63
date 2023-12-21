@@ -3,7 +3,7 @@ import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../../auth";
 import { Unit } from "../../types";
 
-app.http("AddUnit", {
+app.http("CreateUnit", {
   methods: ["POST"],
   authLevel: "anonymous",
   route: "units",
@@ -18,7 +18,7 @@ app.http("AddUnit", {
         throw { status: 400, message: 'Unit name is missing.' };
       const { resource: { id } } = await cosmos.database('db').container('users').items.create<Unit>(data);
       if (data.parentUnitId)
-        cosmos.database('db').container('units').item(data.parentUnitId).patch({
+        cosmos.database('db').container('units').item(data.parentUnitId, data.parentUnitId).patch({
           operations: [
             { path: '/childUnitIds/-', op: 'add', value: id }
           ]

@@ -3,7 +3,7 @@ import { CosmosClient } from "@azure/cosmos";
 import { authenticate } from "../../auth";
 import { SKU } from "../../types";
 
-app.http("AddSKU", {
+app.http("CreateSKU", {
   methods: ["POST"],
   authLevel: "anonymous",
   route: "skus",
