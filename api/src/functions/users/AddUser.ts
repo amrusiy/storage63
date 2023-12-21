@@ -1,7 +1,7 @@
 import { app } from "@azure/functions";
-import { CosmosClient, ItemDefinition } from "@azure/cosmos";
-import { authenticate } from "../auth";
-import { User } from "../types";
+import { CosmosClient } from "@azure/cosmos";
+import { authenticate } from "../../auth";
+import { User } from "../../types";
 
 app.http("AddUser", {
   methods: ["POST"],
@@ -19,7 +19,13 @@ app.http("AddUser", {
       if (!['admin', 'user'].some(_ => data[_]))
         throw { status: 400, message: 'Invalid permission. Expected: admin, user.' };
 
-      cosmos.database('db').container('users').items.create<User>(data);
+      const { resource: { id } } = await cosmos.database('db').container('users').items.create<User>(data);
+      if (data.unitId)
+        cosmos.database('db').container('units').item(data.unitId).patch({
+          operations: [
+            { path: '/userIds/-', op: 'add', value: id }
+          ]
+        });
     } catch (error) {
       return {
         status: error.status ?? 500,

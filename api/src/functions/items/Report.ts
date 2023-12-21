@@ -1,7 +1,7 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
-import { authenticate } from "../auth";
-import { Item, ItemEvent } from "../types";
+import { authenticate } from "../../auth";
+import { ItemEvent } from "../../types";
 
 app.http("Report", {
   methods: ["POST"],

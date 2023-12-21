@@ -1,7 +1,7 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
-import { authenticate } from "../auth";
-import { Item } from "../types";
+import { authenticate } from "../../auth";
+import { Item } from "../../types";
 
 app.http("AddItem", {
   methods: ["POST"],
@@ -17,9 +17,9 @@ app.http("AddItem", {
       // Parse the incoming request body to get the item data
       const itemData: Item = (await request.json()) as any;
 
-      // Validate required fields
+      // Validate required properties
       if (!["unitId", "sku", "status"].every((key) => itemData[key])) {
-        throw { status: 400, body: "Missing required fields." };
+        throw { status: 400, body: "Missing required properties." };
       } else {
         itemData.userId = user.id;
         itemData.history = [

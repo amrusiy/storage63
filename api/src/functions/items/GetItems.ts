@@ -1,7 +1,7 @@
 import { app } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
-import { groupBy } from "../utils";
-import { authenticate } from "../auth";
+import { groupBy } from "../../utils";
+import { authenticate } from "../../auth";
 
 app.http("GetItems", {
   methods: ["GET"],
