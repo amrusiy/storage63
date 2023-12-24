@@ -15,7 +15,6 @@ export async function authenticate(request: HttpRequest) {
     .container("users")
     .item(username, username)
     .read();
-  if (!user || user.username !== username || user.password !== password)
-    throw { status: 401 };
+  if (!user || user.password !== password) throw { status: 401 };
   return user;
 }

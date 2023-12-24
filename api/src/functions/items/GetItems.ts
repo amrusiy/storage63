@@ -13,7 +13,6 @@ app.http("GetItems", {
       const connectionString = process.env.COSMOSDB_CONNECTION_STRING;
       const cosmos = new CosmosClient(connectionString);
       const user = await authenticate(request);
-      context.log(user);
 
       if (request.params.id) {
         // Get specific item
