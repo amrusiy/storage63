@@ -41,7 +41,7 @@ app.http("GetItems", {
           .items.query(
             `SELECT i.id, i.sku, i.status, i.unitId FROM items i WHERE i.unitId IN (${unitIds
               .map((id) => `"${id}"`)
-              .join()})${filter}ORDER BY ${order} ASC`
+              .join()})${filter} ORDER BY ${order} ASC`
           )
           .fetchAll();
         return {
