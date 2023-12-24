@@ -33,8 +33,10 @@ app.http("GetItems", {
         const filter = ["unitId", "sku", "status"]
           .map((key) => ` AND ${key} = ${request.query.get(key)}`)
           .join("");
+
         const order = request.query.get("orderBy");
         const group = request.query.get("groupBy");
+
         const { resources: items } = await cosmos
           .database("db")
           .container("items")
