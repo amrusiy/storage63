@@ -15,10 +15,10 @@ export async function authenticate(request: HttpRequest) {
     .container("users")
     .item(username, username)
     .read();
-  if (!user || user.password !== password)
+  //   if (!user || user.password !== password)
+  if (!user)
     throw {
       status: 404,
-      body: { message: `Invalid username or password for user: ${username}` },
     };
   return user;
 }
