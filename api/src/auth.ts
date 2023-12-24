@@ -6,19 +6,18 @@ export async function authenticate(request: HttpRequest) {
   const cosmosClient = new CosmosClient(connectionString);
 
   const password = request.headers.get("password");
-  const username = request.headers.get("username");
+  const userId = request.headers.get("userId");
 
-  if (!username || !password) throw { status: 401 };
+  if (!userId || !password) throw { status: 401 };
 
   const { resource: user } = await cosmosClient
     .database("db")
     .container("users")
-    .item(username, username)
+    .item(userId, userId)
     .read();
-  //   if (!user || user.password !== password)
-  if (!user)
+  if (!user || user.password !== password)
     throw {
-      status: 404,
+      status: 401,
     };
   return user;
 }
