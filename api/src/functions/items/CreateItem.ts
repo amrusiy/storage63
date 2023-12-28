@@ -37,6 +37,7 @@ app.http("CreateItem", {
             .item(itemData.skuId)
             .read<SKU>()
         ).resource.sku;
+        itemData.lastUpdate = Date.now();
         itemData.history = [
           {
             timestamp: Date.now(),
