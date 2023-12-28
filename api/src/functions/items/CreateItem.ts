@@ -1,7 +1,7 @@
 import { app } from "@azure/functions";
-import { CosmosClient } from "@azure/cosmos";
+import { CosmosClient, ItemDefinition } from "@azure/cosmos";
 import { authenticate } from "../../auth";
-import { Item } from "../../types";
+import { Item, SKU, Unit } from "../../types";
 
 app.http("CreateItem", {
   methods: ["POST"],
@@ -18,10 +18,24 @@ app.http("CreateItem", {
       const itemData: Item = (await request.json()) as any;
 
       // Validate required properties
-      if (!["unitId", "sku", "status"].every((key) => itemData[key])) {
+      if (!["unitId", "skuId", "status"].every((key) => itemData[key])) {
         throw { status: 400, body: "Missing required properties." };
       } else {
         itemData.userId = user.id;
+        itemData.unitName = (
+          await cosmos
+            .database("db")
+            .container("units")
+            .item(itemData.skuId)
+            .read<Unit>()
+        ).resource.name;
+        itemData.sku = (
+          await cosmos
+            .database("db")
+            .container("skus")
+            .item(itemData.skuId)
+            .read<SKU>()
+        ).resource.sku;
         itemData.history = [
           {
             timestamp: Date.now(),

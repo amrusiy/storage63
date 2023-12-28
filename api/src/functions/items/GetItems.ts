@@ -30,20 +30,24 @@ app.http("GetItems", {
       } else {
         // Get list of items
         const unitIds = await getChildUnitIds(user.unitId);
-        const filter = ["unitId", "sku", "status"]
-          .map((key) => ` AND ${key} = ${request.query.get(key)}`)
+        const filter = ["unitId", "skuId", "status"]
+          .map((key) =>
+            request.query.get(key)
+              ? ` AND i.${key} = ${request.query.get(key)}`
+              : ""
+          )
           .join("");
-
-        const order = request.query.get("orderBy");
+        const order = request.query.get("orderBy")
+          ? ` ORDER BY i.${request.query.get("orderBy")} ASC`
+          : "";
         const group = request.query.get("groupBy");
-
         const { resources: items } = await cosmos
           .database("db")
           .container("items")
           .items.query(
-            `SELECT i.id, i.sku, i.status, i.unitId FROM items i WHERE i.unitId IN (${unitIds
+            `SELECT i.id, i.skuId, i.sku, i.status, i.unitId, i.unitName FROM items i WHERE i.unitId IN (${unitIds
               .map((id) => `"${id}"`)
-              .join()}) ${filter} ORDER BY ${order} ASC`
+              .join()})${filter}${order}`
           )
           .fetchAll();
         return {

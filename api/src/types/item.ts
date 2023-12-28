@@ -2,6 +2,8 @@ export type Item = {
   id: string;
   userId: string;
   unitId: string;
+  unitName: string;
+  skuId: string;
   sku: string;
   status: ItemStatus;
   history: ItemEvent[];
