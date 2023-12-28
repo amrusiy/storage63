@@ -6,6 +6,7 @@ export type Item = {
   skuId: string;
   sku: string;
   status: ItemStatus;
+  lastUpdate: number;
   history: ItemEvent[];
 };
 

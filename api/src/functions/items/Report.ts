@@ -19,6 +19,7 @@ app.http("Report", {
           status: 400,
           message: `Body should contain a valid status: active, faulty, lost. Found: '${status}'`,
         };
+      const now = Date.now();
       await cosmos
         .database("db")
         .container("items")
@@ -29,7 +30,7 @@ app.http("Report", {
               path: "/history/-",
               op: "add",
               value: {
-                timestamp: Date.now(),
+                timestamp: now,
                 createdByUserId: user.id,
                 type: "report",
                 status,
@@ -39,6 +40,11 @@ app.http("Report", {
               path: "/status",
               op: "replace",
               value: status,
+            },
+            {
+              path: "/lastUpdate",
+              op: "replace",
+              value: now,
             },
           ],
         });

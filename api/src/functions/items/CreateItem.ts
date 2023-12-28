@@ -18,15 +18,16 @@ app.http("CreateItem", {
       const itemData: Item = (await request.json()) as any;
 
       // Validate required properties
-      if (!["unitId", "skuId", "status"].every((key) => itemData[key])) {
+      if (!["skuId", "status"].every((key) => itemData[key])) {
         throw { status: 400, body: "Missing required properties." };
       } else {
         itemData.userId = user.id;
+        itemData.unitId = user.unitId;
         itemData.unitName = (
           await cosmos
             .database("db")
             .container("units")
-            .item(itemData.skuId)
+            .item(itemData.unitId)
             .read<Unit>()
         ).resource.name;
         itemData.sku = (

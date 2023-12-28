@@ -3,6 +3,7 @@ import { CosmosClient } from "@azure/cosmos";
 import { groupBy } from "../../utils";
 import { authenticate } from "../../auth";
 import { getChildUnitIds } from "../units/GetUnits";
+import moment = require("moment");
 
 app.http("GetItems", {
   methods: ["GET"],
@@ -54,7 +55,18 @@ app.http("GetItems", {
           status: 200,
           body: JSON.stringify(
             group
-              ? Object.entries(groupBy(items, group)).map((_) => ({
+              ? Object.entries(
+                  groupBy(
+                    items.map((item) => ({
+                      ...item,
+                      reported: moment(item.lastUpdate).isSameOrAfter(
+                        moment(),
+                        "day"
+                      ),
+                    })),
+                    group
+                  )
+                ).map((_) => ({
                   [group]: _[0],
                   items: _[1],
                 }))
